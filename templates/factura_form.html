@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Nueva factura{% endblock %}
+{% block page_title %}Nueva factura{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('facturas') }}" class="btn btn-ghost">← Volver</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 640px;">
+  <form method="POST">
+    <div class="form-grid mb-6">
+      <div class="form-group full">
+        <label>Cliente *</label>
+        <select name="cliente_id" required>
+          <option value="">Seleccionar cliente…</option>
+          {% for c in clientes %}
+          <option value="{{ c.id }}">{{ c.nombre }}{% if c.empresa %} — {{ c.empresa }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Concepto *</label>
+        <textarea name="concepto" placeholder="Descripción del servicio o producto facturado…" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Base imponible (€) *</label>
+        <input type="number" name="base" step="0.01" min="0" id="base-input" required>
+      </div>
+      <div class="form-group">
+        <label>IVA (%)</label>
+        <select name="iva" id="iva-input">
+          <option value="21">21%</option>
+          <option value="10">10%</option>
+          <option value="4">4%</option>
+          <option value="0">0%</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Total estimado</label>
+        <input type="text" id="total-preview" readonly style="opacity:0.6" placeholder="—">
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select name="estado">
+          <option value="pendiente">Pendiente</option>
+          <option value="pagada">Pagada</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="btn btn-primary">Crear factura</button>
+      <a href="{{ url_for('facturas') }}" class="btn btn-ghost">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  function updateTotal() {
+    const base = parseFloat(document.getElementById('base-input').value) || 0;
+    const iva = parseFloat(document.getElementById('iva-input').value) || 0;
+    const total = base * (1 + iva / 100);
+    document.getElementById('total-preview').value = total > 0 ? total.toFixed(2) + ' €' : '—';
+  }
+  document.getElementById('base-input').addEventListener('input', updateTotal);
+  document.getElementById('iva-input').addEventListener('change', updateTotal);
+</script>
+{% endblock %}

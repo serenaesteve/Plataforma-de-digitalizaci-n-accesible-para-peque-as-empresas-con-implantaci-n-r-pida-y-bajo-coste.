@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Facturas{% endblock %}
+{% block page_title %}Facturación{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('nueva_factura') }}" class="btn btn-primary">+ Nueva factura</a>
+{% endblock %}
+
+{% block content %}
+<div class="search-bar mb-4">
+  <form method="GET" action="{{ url_for('facturas') }}" style="display:flex;gap:10px">
+    <select name="estado" style="min-width:160px">
+      <option value="">Todos los estados</option>
+      <option value="pendiente" {% if estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+      <option value="pagada" {% if estado == 'pagada' %}selected{% endif %}>Pagada</option>
+      <option value="cancelada" {% if estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+    </select>
+    <button type="submit" class="btn btn-ghost">Filtrar</button>
+    {% if estado %}<a href="{{ url_for('facturas') }}" class="btn btn-ghost">✕ Limpiar</a>{% endif %}
+  </form>
+</div>
+
+<div class="card">
+  {% if facturas %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Cliente</th>
+          <th>Concepto</th>
+          <th>Base</th>
+          <th>IVA</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in facturas %}
+        <tr>
+          <td class="text-gold"><strong>{{ f.numero }}</strong></td>
+          <td>{{ f.cliente.nombre }}</td>
+          <td class="text-muted" style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.concepto }}</td>
+          <td>{{ "%.2f"|format(f.base) }}€</td>
+          <td>{{ f.iva }}%</td>
+          <td><strong>{{ "%.2f"|format(f.total) }}€</strong></td>
+          <td>
+            <span class="badge {% if f.estado == 'pagada' %}badge-ok{% elif f.estado == 'pendiente' %}badge-warn{% else %}badge-danger{% endif %}">
+              {{ f.estado }}
+            </span>
+          </td>
+          <td class="text-muted">{{ f.fecha.strftime('%d/%m/%Y') }}</td>
+          <td>
+            <div class="flex gap-2">
+              <form method="POST" action="{{ url_for('cambiar_estado_factura', id=f.id) }}" style="display:flex;gap:4px">
+                <select name="estado" style="font-size:12px;padding:5px 8px">
+                  <option value="pendiente" {% if f.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                  <option value="pagada" {% if f.estado == 'pagada' %}selected{% endif %}>Pagada</option>
+                  <option value="cancelada" {% if f.estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                </select>
+                <button type="submit" class="btn btn-ghost btn-sm">✓</button>
+              </form>
+              <form method="POST" action="{{ url_for('eliminar_factura', id=f.id) }}" onsubmit="return confirm('¿Eliminar factura?')">
+                <button type="submit" class="btn btn-danger btn-sm">✕</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">📄</div>
+    <div class="empty-text">No hay facturas{% if estado %} con estado "{{ estado }}"{% endif %}.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

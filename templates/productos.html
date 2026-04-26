@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Catálogo{% endblock %}
+{% block page_title %}Catálogo de productos{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary">+ Nuevo producto</a>
+{% endblock %}
+
+{% block content %}
+<div class="search-bar mb-4">
+  <form method="GET" action="{{ url_for('productos') }}" style="display:flex;gap:10px;flex:1;flex-wrap:wrap">
+    <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Buscar producto…">
+    <select name="cat" style="min-width:140px">
+      <option value="">Todas las categorías</option>
+      {% for c in categorias %}
+      <option value="{{ c }}" {% if cat == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-ghost">Filtrar</button>
+    {% if q or cat %}<a href="{{ url_for('productos') }}" class="btn btn-ghost">✕ Limpiar</a>{% endif %}
+  </form>
+</div>
+
+<div class="card">
+  {% if productos %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+        <tr>
+          <td>
+            <div><strong>{{ p.nombre }}</strong></div>
+            {% if p.descripcion %}<div class="text-muted" style="font-size:12px;margin-top:2px">{{ p.descripcion[:60] }}{% if p.descripcion|length > 60 %}…{% endif %}</div>{% endif %}
+          </td>
+          <td><span class="badge badge-warn">{{ p.categoria or '—' }}</span></td>
+          <td class="text-gold"><strong>{{ "%.2f"|format(p.precio) }}€</strong></td>
+          <td>
+            <span class="badge {% if p.stock > 10 %}badge-ok{% elif p.stock > 0 %}badge-warn{% else %}badge-danger{% endif %}">
+              {{ p.stock }} ud.
+            </span>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a href="{{ url_for('editar_producto', id=p.id) }}" class="btn btn-ghost btn-sm">Editar</a>
+              <form method="POST" action="{{ url_for('eliminar_producto', id=p.id) }}" onsubmit="return confirm('¿Eliminar producto?')">
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">📦</div>
+    <div class="empty-text">No hay productos en el catálogo.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

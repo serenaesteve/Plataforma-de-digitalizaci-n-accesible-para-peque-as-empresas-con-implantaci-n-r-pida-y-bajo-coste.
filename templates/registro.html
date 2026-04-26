@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizCore — Crear cuenta</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--petrol); }
+    .auth-wrap { width: 100%; max-width: 400px; padding: 20px; }
+    .auth-logo { text-align: center; margin-bottom: 36px; }
+    .auth-logo .brand { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; color: var(--sand); letter-spacing: 0.04em; }
+    .auth-logo .tagline { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 4px; }
+    .auth-card { background: var(--petrol-mid); border: 1px solid rgba(201,179,154,0.12); border-radius: var(--radius); padding: 36px; }
+    .auth-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--sand); margin-bottom: 24px; font-style: italic; }
+    .auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+    .auth-footer a { color: var(--gold); text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+    .form-group { margin-bottom: 16px; }
+    .btn-block { width: 100%; justify-content: center; margin-top: 8px; padding: 12px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <div class="brand">BizCore</div>
+      <div class="tagline">Gestión para pymes</div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}" style="margin-bottom:16px">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="auth-card">
+      <div class="auth-title">Crear cuenta</div>
+      <form method="POST">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" name="nombre" required autofocus placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required placeholder="tu@email.com">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" name="password" required placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="form-group">
+          <label>Confirmar contraseña</label>
+          <input type="password" name="confirm" required placeholder="Repite la contraseña">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
+      </form>
+    </div>
+
+    <div class="auth-footer">
+      ¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a>
+    </div>
+  </div>
+</body>
+</html>

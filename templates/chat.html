@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Asistente IA{% endblock %}
+{% block page_title %}Asistente IA{% endblock %}
+
+{% block topbar_actions %}
+  <form method="POST" action="{{ url_for('chat_limpiar') }}" onsubmit="return confirm('¿Borrar conversación?')">
+    <button type="submit" class="btn btn-ghost btn-sm">Limpiar chat</button>
+  </form>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+  <div class="chat-messages" id="chat-messages">
+    {% if not historial %}
+    <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;margin-bottom:8px;font-style:italic;">
+        Hola, soy tu asistente BizCore
+      </div>
+      <div style="font-size:13px;">Pregúntame sobre tus clientes, facturas, productos o cualquier duda de gestión.</div>
+    </div>
+    {% endif %}
+
+    {% for m in historial %}
+    <div class="msg msg-{{ m.rol }}">
+      {{ m.contenido }}
+      <div class="msg-meta">{{ m.created_at.strftime('%H:%M') }}</div>
+    </div>
+    {% endfor %}
+
+    <div id="typing" style="display:none" class="msg msg-assistant">
+      <span style="letter-spacing:2px;opacity:0.6">···</span>
+    </div>
+  </div>
+
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Escribe tu mensaje…" autocomplete="off">
+    <button class="btn btn-primary" id="send-btn" onclick="enviar()">Enviar</button>
+  </div>
+</div>
+
+<script>
+const messagesEl = document.getElementById('chat-messages');
+const inputEl = document.getElementById('chat-input');
+const typingEl = document.getElementById('typing');
+
+function scrollBottom() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+scrollBottom();
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') enviar(); });
+
+async function enviar() {
+  const texto = inputEl.value.trim();
+  if (!texto) return;
+
+  inputEl.value = '';
+  document.getElementById('send-btn').disabled = true;
+
+  // Añadir mensaje usuario al DOM
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg msg-user';
+  userMsg.textContent = texto;
+  messagesEl.insertBefore(userMsg, typingEl);
+  typingEl.style.display = 'block';
+  scrollBottom();
+
+  try {
+    const res = await fetch('/chat/enviar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensaje: texto })
+    });
+    const data = await res.json();
+
+    typingEl.style.display = 'none';
+
+    const botMsg = document.createElement('div');
+    botMsg.className = 'msg msg-assistant';
+    botMsg.textContent = data.respuesta || 'Error al obtener respuesta.';
+    messagesEl.insertBefore(botMsg, typingEl);
+    scrollBottom();
+  } catch(e) {
+    typingEl.style.display = 'none';
+    const errMsg = document.createElement('div');
+    errMsg.className = 'msg msg-assistant';
+    errMsg.textContent = 'Error de conexión con el asistente.';
+    messagesEl.insertBefore(errMsg, typingEl);
+  }
+
+  document.getElementById('send-btn').disabled = false;
+  inputEl.focus();
+}
+</script>
+{% endblock %}

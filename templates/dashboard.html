@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Vista general{% endblock %}
+
+{% block content %}
+<div class="stats-grid mb-6">
+  <div class="stat-card">
+    <div class="stat-label">Clientes</div>
+    <div class="stat-value">{{ total_clientes }}</div>
+    <div class="stat-sub">registrados</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Productos</div>
+    <div class="stat-value">{{ total_productos }}</div>
+    <div class="stat-sub">en catálogo</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Ingresos</div>
+    <div class="stat-value">{{ "%.0f"|format(ingresos) }}€</div>
+    <div class="stat-sub">facturas pagadas</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pendiente</div>
+    <div class="stat-value">{{ "%.0f"|format(pendiente) }}€</div>
+    <div class="stat-sub">por cobrar</div>
+  </div>
+</div>
+
+<div class="dash-grid">
+  <div class="card">
+    <div class="card-title">
+      Últimas facturas
+      <a href="{{ url_for('facturas') }}" class="btn btn-ghost btn-sm">Ver todas</a>
+    </div>
+    {% if ultimas_facturas %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in ultimas_facturas %}
+          <tr>
+            <td class="text-gold">{{ f.numero }}</td>
+            <td>{{ f.cliente.nombre }}</td>
+            <td>{{ "%.2f"|format(f.total) }}€</td>
+            <td>
+              <span class="badge {% if f.estado == 'pagada' %}badge-ok{% elif f.estado == 'pendiente' %}badge-warn{% else %}badge-danger{% endif %}">
+                {{ f.estado }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty"><div class="empty-icon">📄</div><div class="empty-text">No hay facturas aún</div></div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      Clientes recientes
+      <a href="{{ url_for('clientes') }}" class="btn btn-ghost btn-sm">Ver todos</a>
+    </div>
+    {% if ultimos_clientes %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Empresa</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in ultimos_clientes %}
+          <tr>
+            <td>{{ c.nombre }}</td>
+            <td class="text-muted">{{ c.empresa or '—' }}</td>
+            <td class="text-muted">{{ c.email or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty"><div class="empty-icon">👥</div><div class="empty-text">No hay clientes aún</div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

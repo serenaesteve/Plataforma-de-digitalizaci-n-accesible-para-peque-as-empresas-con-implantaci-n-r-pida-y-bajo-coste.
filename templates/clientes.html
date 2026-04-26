@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('nuevo_cliente') }}" class="btn btn-primary">+ Nuevo cliente</a>
+{% endblock %}
+
+{% block content %}
+<div class="search-bar mb-4">
+  <form method="GET" action="{{ url_for('clientes') }}" style="display:flex;gap:10px;flex:1">
+    <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre o email…">
+    <button type="submit" class="btn btn-ghost">Buscar</button>
+    {% if q %}<a href="{{ url_for('clientes') }}" class="btn btn-ghost">✕ Limpiar</a>{% endif %}
+  </form>
+</div>
+
+<div class="card">
+  {% if clientes %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Empresa</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Registrado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clientes %}
+        <tr>
+          <td><strong>{{ c.nombre }}</strong></td>
+          <td class="text-muted">{{ c.empresa or '—' }}</td>
+          <td class="text-muted">{{ c.email or '—' }}</td>
+          <td class="text-muted">{{ c.telefono or '—' }}</td>
+          <td class="text-muted">{{ c.created_at.strftime('%d/%m/%Y') }}</td>
+          <td>
+            <div class="flex gap-2">
+              <a href="{{ url_for('editar_cliente', id=c.id) }}" class="btn btn-ghost btn-sm">Editar</a>
+              <form method="POST" action="{{ url_for('eliminar_cliente', id=c.id) }}" onsubmit="return confirm('¿Eliminar cliente?')">
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">👥</div>
+    <div class="empty-text">No hay clientes{% if q %} que coincidan con "{{ q }}"{% endif %}.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
